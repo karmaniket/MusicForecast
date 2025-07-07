@@ -12,7 +12,6 @@ import pickle
 import os
 
 try:
-    # Loading
     data_path = 'music_dataset.csv'
     df = pd.read_csv(data_path)
     
@@ -21,18 +20,15 @@ try:
     print(df.info())
     print("\nDataset Statistics:")
     print(df.describe())
-    
-    # duplicates
     duplicates = df.duplicated().sum()
     print(f"\nNumber of duplicate records: {duplicates}")
     
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(10, 5))
     sns.histplot(df['popularity'])
     plt.title('Distribution of Popularity Scores')
     plt.savefig('assets\popularity_distribution.png')
     plt.close()
     
-    # Cleaning and Removing missing values
     initial_rows = df.shape[0]
     df.dropna(inplace=True)
     print(f"\nRemoved {initial_rows - df.shape[0]} rows with missing values")
@@ -53,7 +49,7 @@ try:
         pickle.dump(scaler, f)
     
     numeric_df = df.select_dtypes(include=[np.number])
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(10, 5))
     sns.heatmap(numeric_df.corr(), annot=True, fmt=".2f", cmap='coolwarm')
     plt.title('Feature Correlation Matrix')
     plt.tight_layout()
@@ -114,7 +110,6 @@ try:
     
     print(f"Best parameters: {grid_search.best_params_}")
     
-    # Train model
     best_model = grid_search.best_estimator_
     best_model.fit(X_train, y_train)
     
@@ -135,7 +130,7 @@ try:
     train_sizes, train_scores, test_scores = learning_curve(
         best_model, X, y, cv=5, scoring='r2', train_sizes=np.linspace(0.1, 1.0, 10))
     
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 5))
     plt.plot(train_sizes, train_scores.mean(axis=1), 'o-', label='Training score')
     plt.plot(train_sizes, test_scores.mean(axis=1), 'o-', label='Cross-validation score')
     plt.xlabel('Training examples')
@@ -151,7 +146,7 @@ try:
     })
     coef_df = coef_df.sort_values('Coefficient', key=abs, ascending=False)
     
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(10, 5))
     sns.barplot(x='Coefficient', y='Feature', data=coef_df.head(15))
     plt.title('Top 15 Feature Coefficients')
     plt.tight_layout()
@@ -160,7 +155,7 @@ try:
     
     residuals = y_test - y_pred_best
     
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
     plt.scatter(y_pred_best, residuals)
     plt.axhline(y=0, color='r', linestyle='-')
@@ -178,27 +173,7 @@ try:
     with open('model.pkl', 'wb') as f:
         pickle.dump(best_model, f)
     
-    # prediction function
     def predict_popularity(model_path, scaler_path, feature_path, new_data):
-        """
-        Make predictions on new music data
-        
-        Parameters:
-        -----------
-        model_path : str
-            Path to the saved model file
-        scaler_path : str
-            Path to the saved scaler file
-        feature_path : str
-            Path to the saved feature names file
-        new_data : dict
-            Dictionary containing music attributes
-            
-        Returns:
-        --------
-        float
-            Predicted popularity score
-        """
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
         
